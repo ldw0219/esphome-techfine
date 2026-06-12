@@ -1,21 +1,21 @@
-# pipsolar2/select.py
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import select
 from esphome.const import CONF_ID
 
-from . import Pipsolar2, pipsolar2_ns  # <--- 注意这里引用的是 pipsolar2_ns
+# 这里的 pipsolar2_ns 必须对应你 C++ 代码里的 namespace
+CODEOWNERS = ["@yourname"]
+DEPENDENCIES = ['pipsolar2'] # 或者是 'uart'，取决于你的设计
 
-CONF_PIPSOLAR_SELECT = "pipsolar_select"
+pipsolar2_ns = cg.esphome_ns.namespace('pipsolar2')
+PipsolarSelect = pipsolar2_ns.class_('PipsolarSelect', select.Select, cg.Component)
 
-PipsolarSelect = pipsolar2_ns.class_("PipsolarSelect", select.Select, cg.Component)
-
-CONFIG_SCHEMA = select.select_schema(PipsolarSelect).extend(
-    {
-        cv.GenerateID(): cv.declare_id(PipsolarSelect),
-    }
-)
+CONFIG_SCHEMA = select.SELECT_SCHEMA.extend({
+    cv.GenerateID(): cv.declare_id(PipsolarSelect),
+    # 这里定义你的 YAML 配置项，例如 options 等
+}).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = await select.new_select(config, options=[]) # 这里的 options 可能需要动态获取，视具体逻辑而定
+    var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+    await select.register_select(var, config, options=config["options"]) # 假设你有 options
