@@ -7,7 +7,9 @@
 #include "esphome/components/select/select.h"
 #include "esphome/core/component.h"
 
-namespace esphome::pipsolar {
+namespace esphome {
+namespace pipsolar {
+
 class Pipsolar;
 
 class PipsolarSelect : public Component, public select::Select {
@@ -27,4 +29,5 @@ class PipsolarSelect : public Component, public select::Select {
   bool optimistic_{false};
 };
 
-}  // namespace esphome::pipsolar2
+}  // namespace pipsolar  // 已修复：原本是 pipsolar2
+}  // namespace esphome
