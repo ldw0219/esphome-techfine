@@ -3,8 +3,7 @@
 #include <map>
 #include <utility>
 
-// 关键修改：把 pipsolar 改成 pipsolar2，和你的实际文件夹名一致
-#include "esphome/components/pipsolar2/pipsolar.h"
+#include "esphome/components/pipsolar2/pipsolar.h" // 修正路径为你的文件夹名
 #include "esphome/components/select/select.h"
 #include "esphome/core/component.h"
 
