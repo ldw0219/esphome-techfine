@@ -8,7 +8,7 @@ CODEOWNERS = ["@andreashergert1984"]
 AUTO_LOAD = ["binary_sensor", "text_sensor", "sensor", "switch", "output", "select"]
 MULTI_CONF = True
 
-CONF_PIPSOLAR_ID = "pipsolar_id"
+CONF_PIPSOLAR_ID = "pipsolar2"
 
 pipsolar_ns = cg.esphome_ns.namespace("pipsolar")
 PipsolarComponent = pipsolar_ns.class_("Pipsolar", cg.Component)
