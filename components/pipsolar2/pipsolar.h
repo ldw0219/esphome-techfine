@@ -7,6 +7,7 @@
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
+#include "pipsolar_select.h" // 包含 Select 类
 
 namespace esphome {
 namespace pipsolar {
@@ -21,13 +22,26 @@ enum ENUMPollingCommand {
   POLLING_QMN = 6,
   POLLING_HGEN = 7,
   POLLING_HPVB = 8,
+  POLLING_QPIGS2 = 9,
+  POLLING_QBATCD = 10,
+  POLLING_QPGS0 = 11,
+  POLLING_Q1 = 12,
+  POLLING_QBMS = 13,
+  POLLING_QET = 14,
+  POLLING_QLT = 15,
+  POLLING_QMCHGCR = 16,
+  POLLING_QMUCHGCR = 17,
 };
+
 struct PollingCommand {
   uint8_t *command;
   uint8_t length = 0;
   uint8_t errors;
   ENUMPollingCommand identifier;
+  bool needs_update = false;
 };
+
+#define POLLING_COMMANDS_MAX 18 // 定义常量
 
 #define PIPSOLAR_VALUED_ENTITY_(type, name, polling_command, value_type) \
  protected: \
@@ -67,9 +81,9 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SENSOR(battery_charging_current, QPIGS, int)
   PIPSOLAR_SENSOR(battery_capacity_percent, QPIGS, int)
   PIPSOLAR_SENSOR(inverter_heat_sink_temperature, QPIGS, int)
-  PIPSOLAR_SENSOR(pv_input_current_for_battery, QPIGS, float)
-  PIPSOLAR_SENSOR(pv_input_voltage, QPIGS, float)
-  PIPSOLAR_SENSOR(battery_voltage_scc, QPIGS, float)
+  PIPSOLAR_SENSOR(pv1_input_current_, QPIGS, float)
+  PIPSOLAR_SENSOR(pv1_input_voltage_, QPIGS, float)
+  PIPSOLAR_SENSOR(battery_voltage_scc_, QPIGS, float)
   PIPSOLAR_SENSOR(battery_discharge_current, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(add_sbu_priority_version, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(configuration_status, QPIGS, int)
@@ -79,9 +93,9 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_BINARY_SENSOR(charging_status, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(scc_charging_status, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(ac_charging_status, QPIGS, int)
-  PIPSOLAR_SENSOR(battery_voltage_offset_for_fans_on, QPIGS, int)  //.1 scale
+  PIPSOLAR_SENSOR(battery_voltage_offset_for_fans_on, QPIGS, int)
   PIPSOLAR_SENSOR(eeprom_version, QPIGS, int)
-  PIPSOLAR_SENSOR(pv_charging_power, QPIGS, int)
+  PIPSOLAR_SENSOR(pv1_charging_power_, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(charging_to_floating_mode, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(switch_on, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(dustproof_installed, QPIGS, int)
@@ -96,10 +110,10 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SENSOR(annual_electricity_generation, HGEN, float)
   PIPSOLAR_SENSOR(total_electricity_generation, HGEN, float)
   
-  //HPVB values
-  PIPSOLAR_SENSOR(pv2_input_voltage, HPVB, float)
-  PIPSOLAR_SENSOR(pv2_input_current, HPVB, float)
-  PIPSOLAR_SENSOR(pv2_input_power, HPVB, float)
+  // HPVB values
+  PIPSOLAR_SENSOR(pv2_input_voltage_, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_current_, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_power_, HPVB, float)
 
   // QPIRI values
   PIPSOLAR_SENSOR(grid_rating_voltage, QPIRI, float)
@@ -187,6 +201,8 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_TEXT_SENSOR(last_qpiws, QPIWS)
   PIPSOLAR_TEXT_SENSOR(last_qt, QT)
   PIPSOLAR_TEXT_SENSOR(last_qmn, QMN)
+  PIPSOLAR_TEXT_SENSOR(last_qbatcd, QBATCD)
+  PIPSOLAR_TEXT_SENSOR(last_qbms, QBMS)
 
   PIPSOLAR_SWITCH(output_source_priority_utility_switch, QPIRI)
   PIPSOLAR_SWITCH(output_source_priority_solar_switch, QPIRI)
@@ -196,13 +212,31 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SWITCH(pv_ok_condition_for_parallel_switch, QPIRI)
   PIPSOLAR_SWITCH(pv_power_balance_switch, QPIRI)
 
+  // Select 相关成员变量
+  PipsolarSelect *output_source_priority_select_{};
+  PipsolarSelect *charger_source_priority_select_{};
+  PipsolarSelect *battery_recharge_voltage_select_{};
+  PipsolarSelect *battery_cutoff_voltage_select_{};
+  PipsolarSelect *battery_bulk_voltage_select_{};
+  PipsolarSelect *battery_float_voltage_select_{};
+  PipsolarSelect *battery_type_select_{};
+  PipsolarSelect *current_max_ac_charging_current_select_{};
+  PipsolarSelect *current_max_charging_current_select_{};
+  PipsolarSelect *battery_redischarge_voltage_select_{};
+  PipsolarSelect *max_discharging_current_select_{};
+  PipsolarSelect *battery_max_bulk_charging_time_select_{};
+  PipsolarSelect *charging_discharging_control_select_{};
+  PipsolarSelect *bms_values_select_{};
+
   void switch_command(const std::string &command);
   void setup() override;
   void loop() override;
   void dump_config() override;
   void update() override;
 
- protected:
+  // 补充缺失的函数声明
+  void handle_poll_response_(ENUMPollingCommand polling_command, const char *message);
+  void handle_poll_error_(ENUMPollingCommand polling_command);
   void handle_qpiri_(const char *message);
   void handle_qpigs_(const char *message);
   void handle_qmod_(const char *message);
@@ -219,7 +253,16 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void handle_qlt_(const char *message);
   void handle_qmchgcr_(const char *message);
   void handle_qmuchgcr_(const char *message);
-  static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 110;  // maximum supported answer length
+  void queue_command(const std::string &command);
+  void skip_start_(const char *message, size_t *pos);
+  std::string read_field_(const char *message, size_t *pos);
+  template<typename T> void read_float_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  template<typename T> void read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  void publish_binary_sensor_(optional<bool> state, binary_sensor::BinarySensor *sensor);
+  optional<bool> get_bit_(const std::string &message, int index);
+
+ protected:
+  static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 110;
   static const size_t COMMAND_QUEUE_LENGTH = 10;
   static const size_t COMMAND_TIMEOUT = 5000;
   uint32_t last_poll_ = 0;
@@ -249,7 +292,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   };
 
   uint8_t last_polling_command_ = 0;
-  PollingCommand used_polling_commands_[15];
+  PollingCommand used_polling_commands_[15]; // 头文件定义的是 used，.cpp 里的 enabled 要改成这个
 };
 
 }  // namespace pipsolar
