@@ -60,8 +60,8 @@ void Pipsolar::loop() {
   }
 
   if (this->state_ == STATE_POLL_CHECKED) {
-    ESP_LOGD(TAG, "poll %s decode", this->enabled_polling_commands_[this->last_polling_command_].command);
-    this->handle_poll_response_(this->enabled_polling_commands_[this->last_polling_command_].identifier, (const char *) this->read_buffer_);
+    ESP_LOGD(TAG, "poll %s decode", this->used_polling_commands_[this->last_polling_command_].command);
+    this->handle_poll_response_(this->used_polling_commands_[this->last_polling_command_].identifier, (const char *) this->read_buffer_);
     this->state_ = STATE_IDLE;
     return;
   }
@@ -69,16 +69,16 @@ void Pipsolar::loop() {
   if (this->state_ == STATE_POLL_COMPLETE) {
     if (this->check_incoming_crc_()) {
       if (this->read_buffer_[0] == '(' && this->read_buffer_[1] == 'N' && this->read_buffer_[2] == 'A' && this->read_buffer_[3] == 'K') {
-        ESP_LOGD(TAG, "poll %s NACK", this->enabled_polling_commands_[this->last_polling_command_].command);
-        this->handle_poll_error_(this->enabled_polling_commands_[this->last_polling_command_].identifier);
+        ESP_LOGD(TAG, "poll %s NACK", this->used_polling_commands_[this->last_polling_command_].command);
+        this->handle_poll_error_(this->used_polling_commands_[this->last_polling_command_].identifier);
         this->state_ = STATE_IDLE;
         return;
       }
-      this->enabled_polling_commands_[this->last_polling_command_].needs_update = false;
+      this->used_polling_commands_[this->last_polling_command_].needs_update = false;
       this->state_ = STATE_POLL_CHECKED;
       return;
     } else {
-      this->handle_poll_error_(this->enabled_polling_commands_[this->last_polling_command_].identifier);
+      this->handle_poll_error_(this->used_polling_commands_[this->last_polling_command_].identifier);
       this->state_ = STATE_IDLE;
     }
   }
@@ -137,8 +137,8 @@ void Pipsolar::loop() {
 
   if (this->state_ == STATE_POLL) {
     if (millis() - this->command_start_millis_ > Pipsolar::COMMAND_TIMEOUT) {
-      ESP_LOGD(TAG, "poll %s timeout", this->enabled_polling_commands_[this->last_polling_command_].command);
-      this->handle_poll_error_(this->enabled_polling_commands_[this->last_polling_command_].identifier);
+      ESP_LOGD(TAG, "poll %s timeout", this->used_polling_commands_[this->last_polling_command_].command);
+      this->handle_poll_error_(this->used_polling_commands_[this->last_polling_command_].identifier);
       this->state_ = STATE_IDLE;
     }
   }
@@ -199,22 +199,22 @@ bool Pipsolar::send_next_poll_() {
   uint16_t crc16;
   for (uint8_t i = 0; i < POLLING_COMMANDS_MAX; i++) {
     this->last_polling_command_ = (this->last_polling_command_ + 1) % POLLING_COMMANDS_MAX;
-    if (this->enabled_polling_commands_[this->last_polling_command_].length == 0) {
+    if (this->used_polling_commands_[this->last_polling_command_].length == 0) {
       continue;
     }
-    if (!this->enabled_polling_commands_[this->last_polling_command_].needs_update) {
+    if (!this->used_polling_commands_[this->last_polling_command_].needs_update) {
       continue;
     }
     this->state_ = STATE_POLL;
     this->command_start_millis_ = millis();
     this->empty_uart_buffer_();
     this->read_pos_ = 0;
-    crc16 = this->pipsolar_crc_(this->enabled_polling_commands_[this->last_polling_command_].command, this->enabled_polling_commands_[this->last_polling_command_].length);
-    this->write_array(this->enabled_polling_commands_[this->last_polling_command_].command, this->enabled_polling_commands_[this->last_polling_command_].length);
+    crc16 = this->pipsolar_crc_(this->used_polling_commands_[this->last_polling_command_].command, this->used_polling_commands_[this->last_polling_command_].length);
+    this->write_array(this->used_polling_commands_[this->last_polling_command_].command, this->used_polling_commands_[this->last_polling_command_].length);
     this->write(((uint8_t) ((crc16) >> 8)));
     this->write(((uint8_t) ((crc16) & 0xff)));
     this->write(0x0D);
-    ESP_LOGD(TAG, "Sending polling command: %s with length %d", this->enabled_polling_commands_[this->last_polling_command_].command, this->enabled_polling_commands_[this->last_polling_command_].length);
+    ESP_LOGD(TAG, "Sending polling command: %s with length %d", this->used_polling_commands_[this->last_polling_command_].command, this->used_polling_commands_[this->last_polling_command_].length);
     return true;
   }
   return false;
