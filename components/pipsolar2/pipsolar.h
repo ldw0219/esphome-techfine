@@ -4,12 +4,11 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/text_sensor/text_sensor.h"
-#include "esphome/components/uart/uart.h"
+#include "esphome/components/uart/uart.h"  // LOG_UART_DEVICE 定义在这里
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
 #include <string>
-#include <optional>
-using optional = std::optional;
+#include <optional>  // 去掉 using optional = std::optional;
 
 namespace esphome {
 namespace pipsolar {
@@ -86,9 +85,10 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SENSOR(battery_charging_current, QPIGS, int)
   PIPSOLAR_SENSOR(battery_capacity_percent, QPIGS, int)
   PIPSOLAR_SENSOR(inverter_heat_sink_temperature, QPIGS, int)
-  PIPSOLAR_SENSOR(pv1_input_current_, QPIGS, float)
-  PIPSOLAR_SENSOR(pv1_input_voltage_, QPIGS, float)
-  PIPSOLAR_SENSOR(battery_voltage_scc_, QPIGS, float)
+  // 这里变量名不要带下划线，避免生成两个下划线
+  PIPSOLAR_SENSOR(pv1_input_current, QPIGS, float)
+  PIPSOLAR_SENSOR(pv1_input_voltage, QPIGS, float)
+  PIPSOLAR_SENSOR(battery_voltage_scc, QPIGS, float)
   PIPSOLAR_SENSOR(battery_discharge_current, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(add_sbu_priority_version, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(configuration_status, QPIGS, int)
@@ -100,7 +100,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_BINARY_SENSOR(ac_charging_status, QPIGS, int)
   PIPSOLAR_SENSOR(battery_voltage_offset_for_fans_on, QPIGS, int)
   PIPSOLAR_SENSOR(eeprom_version, QPIGS, int)
-  PIPSOLAR_SENSOR(pv1_charging_power_, QPIGS, int)
+  PIPSOLAR_SENSOR(pv1_charging_power, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(charging_to_floating_mode, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(switch_on, QPIGS, int)
   PIPSOLAR_BINARY_SENSOR(dustproof_installed, QPIGS, int)
@@ -116,9 +116,9 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_SENSOR(total_electricity_generation, HGEN, float)
 
   // HPVB
-  PIPSOLAR_SENSOR(pv2_input_voltage_, HPVB, float)
-  PIPSOLAR_SENSOR(pv2_input_current_, HPVB, float)
-  PIPSOLAR_SENSOR(pv2_input_power_, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_voltage, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_current, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_power, HPVB, float)
 
   // QPIRI
   PIPSOLAR_SENSOR(grid_rating_voltage, QPIRI, float)
@@ -195,7 +195,7 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PIPSOLAR_BINARY_SENSOR(warning_battery_too_low_to_charge, QPIWS, bool)
   PIPSOLAR_BINARY_SENSOR(fault_dc_dc_over_current, QPIWS, bool)
   PIPSOLAR_BINARY_SENSOR(fault_code, QPIWS, int)
-  PIPSOLAR_BINARY_SENSOR(warnung_low_pv_energy, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_low_pv_energy, QPIWS, bool)
   PIPSOLAR_BINARY_SENSOR(warning_high_ac_input_during_bus_soft_start, QPIWS, bool)
   PIPSOLAR_BINARY_SENSOR(warning_battery_equalization, QPIWS, bool)
 
@@ -278,19 +278,18 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   static const size_t COMMAND_TIMEOUT = 5000;
 
   uint32_t last_poll_ = 0;
-  uint8_t state_;
+  uint8_t state_ = 0;
   enum State {
     STATE_IDLE = 0,
     STATE_POLL = 1,
     STATE_COMMAND = 2,
-    STATE_POLL_COMPLETE = 3,
-    STATE_COMMAND_COMPLETE = 4,
     STATE_POLL_CHECKED = 5,
     STATE_POLL_DECODED = 6,
+    STATE_COMMAND_COMPLETE = 4,
   };
 
   uint8_t last_polling_command_ = 0;
-  PollingCommand used_polling_commands_[15];
+  PollingCommand used_polling_commands_[POLLING_COMMANDS_MAX];
 
   void add_polling_command_(const char *command, ENUMPollingCommand polling_command);
   bool send_next_poll_();
