@@ -7,14 +7,15 @@
 #include "esphome/components/uart/uart.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/component.h"
+#include <string>
+#include <optional>
 
 namespace esphome {
 namespace pipsolar {
 
-// 1. 前向声明 PipsolarSelect，解决循环依赖问题
+// 前向声明，解决循环依赖
 class PipsolarSelect;
 
-// 2. 定义枚举和结构体
 enum ENUMPollingCommand {
   POLLING_QPIRI = 0,
   POLLING_QPIGS = 1,
@@ -46,7 +47,6 @@ struct PollingCommand {
 
 #define POLLING_COMMANDS_MAX 18
 
-// 3. 宏定义
 #define PIPSOLAR_VALUED_ENTITY_(type, name, polling_command, value_type) \
  protected: \
   value_type value_##name##_; \
@@ -54,10 +54,10 @@ struct PollingCommand {
 
 #define PIPSOLAR_ENTITY_(type, name, polling_command) \
  protected: \
-  type *name##_{}; /* NOLINT */ \
+  type *name##_{}; \
 \
  public: \
-  void set_##name(type *name) { /* NOLINT */ \
+  void set_##name(type *name) { \
     this->name##_ = name; \
     this->add_polling_command_(#polling_command, POLLING_##polling_command); \
   }
@@ -71,11 +71,152 @@ struct PollingCommand {
   PIPSOLAR_VALUED_ENTITY_(text_sensor::TextSensor, name, polling_command, value_type)
 #define PIPSOLAR_TEXT_SENSOR(name, polling_command) PIPSOLAR_ENTITY_(text_sensor::TextSensor, name, polling_command)
 
-// 4. 主类定义
 class Pipsolar : public uart::UARTDevice, public PollingComponent {
-  // ... 你的其他成员变量（传感器、开关等）...
+  // QPIGS
+  PIPSOLAR_SENSOR(grid_voltage, QPIGS, float)
+  PIPSOLAR_SENSOR(grid_frequency, QPIGS, float)
+  PIPSOLAR_SENSOR(ac_output_voltage, QPIGS, float)
+  PIPSOLAR_SENSOR(ac_output_frequency, QPIGS, float)
+  PIPSOLAR_SENSOR(ac_output_apparent_power, QPIGS, int)
+  PIPSOLAR_SENSOR(ac_output_active_power, QPIGS, int)
+  PIPSOLAR_SENSOR(output_load_percent, QPIGS, int)
+  PIPSOLAR_SENSOR(bus_voltage, QPIGS, int)
+  PIPSOLAR_SENSOR(battery_voltage, QPIGS, float)
+  PIPSOLAR_SENSOR(battery_charging_current, QPIGS, int)
+  PIPSOLAR_SENSOR(battery_capacity_percent, QPIGS, int)
+  PIPSOLAR_SENSOR(inverter_heat_sink_temperature, QPIGS, int)
+  PIPSOLAR_SENSOR(pv1_input_current_, QPIGS, float)
+  PIPSOLAR_SENSOR(pv1_input_voltage_, QPIGS, float)
+  PIPSOLAR_SENSOR(battery_voltage_scc_, QPIGS, float)
+  PIPSOLAR_SENSOR(battery_discharge_current, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(add_sbu_priority_version, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(configuration_status, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(scc_firmware_version, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(load_status, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(battery_voltage_to_steady_while_charging, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(charging_status, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(scc_charging_status, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(ac_charging_status, QPIGS, int)
+  PIPSOLAR_SENSOR(battery_voltage_offset_for_fans_on, QPIGS, int)
+  PIPSOLAR_SENSOR(eeprom_version, QPIGS, int)
+  PIPSOLAR_SENSOR(pv1_charging_power_, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(charging_to_floating_mode, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(switch_on, QPIGS, int)
+  PIPSOLAR_BINARY_SENSOR(dustproof_installed, QPIGS, int)
 
-  // Select 相关成员变量（现在 PipsolarSelect 已经前向声明，编译器能识别了）
+  // HGEN
+  PIPSOLAR_SENSOR(today_date, HGEN, int)
+  PIPSOLAR_SENSOR(now_time, HGEN, int)
+  PIPSOLAR_SENSOR(now_time_hour, HGEN, int)
+  PIPSOLAR_SENSOR(now_time_min, HGEN, int)
+  PIPSOLAR_SENSOR(daily_electricity_generation, HGEN, float)
+  PIPSOLAR_SENSOR(monthly_electricity_generation, HGEN, float)
+  PIPSOLAR_SENSOR(annual_electricity_generation, HGEN, float)
+  PIPSOLAR_SENSOR(total_electricity_generation, HGEN, float)
+
+  // HPVB
+  PIPSOLAR_SENSOR(pv2_input_voltage_, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_current_, HPVB, float)
+  PIPSOLAR_SENSOR(pv2_input_power_, HPVB, float)
+
+  // QPIRI
+  PIPSOLAR_SENSOR(grid_rating_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(grid_rating_current, QPIRI, float)
+  PIPSOLAR_SENSOR(ac_output_rating_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(ac_output_rating_frequency, QPIRI, float)
+  PIPSOLAR_SENSOR(ac_output_rating_current, QPIRI, float)
+  PIPSOLAR_SENSOR(ac_output_rating_apparent_power, QPIRI, int)
+  PIPSOLAR_SENSOR(ac_output_rating_active_power, QPIRI, int)
+  PIPSOLAR_SENSOR(battery_rating_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(battery_recharge_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(battery_under_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(battery_bulk_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(battery_float_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(battery_type, QPIRI, int)
+  PIPSOLAR_SENSOR(current_max_ac_charging_current, QPIRI, int)
+  PIPSOLAR_SENSOR(current_max_charging_current, QPIRI, int)
+  PIPSOLAR_SENSOR(input_voltage_range, QPIRI, int)
+  PIPSOLAR_SENSOR(output_source_priority, QPIRI, int)
+  PIPSOLAR_SENSOR(charger_source_priority, QPIRI, int)
+  PIPSOLAR_SENSOR(parallel_max_num, QPIRI, int)
+  PIPSOLAR_SENSOR(machine_type, QPIRI, int)
+  PIPSOLAR_SENSOR(topology, QPIRI, int)
+  PIPSOLAR_SENSOR(output_mode, QPIRI, int)
+  PIPSOLAR_SENSOR(battery_redischarge_voltage, QPIRI, float)
+  PIPSOLAR_SENSOR(pv_ok_condition_for_parallel, QPIRI, int)
+  PIPSOLAR_SENSOR(pv_power_balance, QPIRI, int)
+
+  // QMOD
+  PIPSOLAR_VALUED_TEXT_SENSOR(device_mode, QMOD, char)
+
+  // QFLAG
+  PIPSOLAR_BINARY_SENSOR(silence_buzzer_open_buzzer, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(overload_bypass_function, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(lcd_escape_to_default, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(overload_restart_function, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(over_temperature_restart_function, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(backlight_on, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(alarm_on_when_primary_source_interrupt, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(fault_code_record, QFLAG, int)
+  PIPSOLAR_BINARY_SENSOR(power_saving, QFLAG, int)
+
+  // QPIWS
+  PIPSOLAR_BINARY_SENSOR(warnings_present, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(faults_present, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_power_loss, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_inverter_fault, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_bus_over, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_bus_under, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_bus_soft_fail, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_line_fail, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_opvshort, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_inverter_voltage_too_low, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_inverter_voltage_too_high, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_over_temperature, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_fan_lock, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_voltage_high, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_low_alarm, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_under_shutdown, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_derating, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_over_load, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_eeprom_failed, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_inverter_over_current, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_inverter_soft_failed, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_self_test_failed, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_op_dc_voltage_over, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_battery_open, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_current_sensor_failed, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_battery_short, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_power_limit, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_pv_voltage_high, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_mppt_overload, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_mppt_overload, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_too_low_to_charge, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_dc_dc_over_current, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(fault_code, QPIWS, int)
+  PIPSOLAR_BINARY_SENSOR(warnung_low_pv_energy, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_high_ac_input_during_bus_soft_start, QPIWS, bool)
+  PIPSOLAR_BINARY_SENSOR(warning_battery_equalization, QPIWS, bool)
+
+  PIPSOLAR_TEXT_SENSOR(last_qpigs, QPIGS)
+  PIPSOLAR_TEXT_SENSOR(last_qpiri, QPIRI)
+  PIPSOLAR_TEXT_SENSOR(last_qmod, QMOD)
+  PIPSOLAR_TEXT_SENSOR(last_qflag, QFLAG)
+  PIPSOLAR_TEXT_SENSOR(last_qpiws, QPIWS)
+  PIPSOLAR_TEXT_SENSOR(last_qt, QT)
+  PIPSOLAR_TEXT_SENSOR(last_qmn, QMN)
+  PIPSOLAR_TEXT_SENSOR(last_qbatcd, QBATCD)
+  PIPSOLAR_TEXT_SENSOR(last_qbms, QBMS)
+
+  PIPSOLAR_SWITCH(output_source_priority_utility_switch, QPIRI)
+  PIPSOLAR_SWITCH(output_source_priority_solar_switch, QPIRI)
+  PIPSOLAR_SWITCH(output_source_priority_battery_switch, QPIRI)
+  PIPSOLAR_SWITCH(output_source_priority_hybrid_switch, QPIRI)
+  PIPSOLAR_SWITCH(input_voltage_range_switch, QPIRI)
+  PIPSOLAR_SWITCH(pv_ok_condition_for_parallel_switch, QPIRI)
+  PIPSOLAR_SWITCH(pv_power_balance_switch, QPIRI)
+
+  // Select 组件指针
   PipsolarSelect *output_source_priority_select_{};
   PipsolarSelect *charger_source_priority_select_{};
   PipsolarSelect *battery_recharge_voltage_select_{};
@@ -91,15 +232,83 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   PipsolarSelect *charging_discharging_control_select_{};
   PipsolarSelect *bms_values_select_{};
 
-  // ... 你的成员函数声明 ...
+  // 公共虚函数（ESPHome 标准生命周期）
+  void setup() override;
+  void loop() override;
+  void update() override;
+  void dump_config() override;
+
+  // 对外接口
+  void switch_command(const std::string &command);
+  void queue_command(const std::string &command);
+
+  // 内部回调/解析函数声明
+  void handle_poll_response_(ENUMPollingCommand polling_command, const char *message);
+  void handle_poll_error_(ENUMPollingCommand polling_command);
+  void handle_qpiri_(const char *message);
+  void handle_qpigs_(const char *message);
+  void handle_qmod_(const char *message);
+  void handle_qflag_(const char *message);
+  void handle_qpiws_(const char *message);
+  void handle_qt_(const char *message);
+  void handle_qmn_(const char *message);
+  void handle_qpigs2_(const char *message);
+  void handle_qbatcd_(const char *message);
+  void handle_qpgs0_(const char *message);
+  void handle_q1_(const char *message);
+  void handle_qbms_(const char *message);
+  void handle_qet_(const char *message);
+  void handle_qlt_(const char *message);
+  void handle_qmchgcr_(const char *message);
+  void handle_qmuchgcr_(const char *message);
+  void handle_hgen_(const char *message);
+  void handle_hpvb_(const char *message);
+
+  void skip_start_(const char *message, size_t *pos);
+  std::string read_field_(const char *message, size_t *pos);
+  template<typename T> void read_float_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  template<typename T> void read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  std::optional<bool> get_bit_(const std::string &message, int index);
+  void publish_binary_sensor_(std::optional<bool> state, binary_sensor::BinarySensor *sensor);
 
  protected:
-  // ... 你的其他成员变量 ...
+  static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 110;
+  static const size_t COMMAND_QUEUE_LENGTH = 10;
+  static const size_t COMMAND_TIMEOUT = 5000;
+
+  uint32_t last_poll_ = 0;
+  uint8_t state_;
+  enum State {
+    STATE_IDLE = 0,
+    STATE_POLL = 1,
+    STATE_COMMAND = 2,
+    STATE_POLL_COMPLETE = 3,
+    STATE_COMMAND_COMPLETE = 4,
+    STATE_POLL_CHECKED = 5,
+    STATE_POLL_DECODED = 6,
+  };
+
+  uint8_t last_polling_command_ = 0;
   PollingCommand used_polling_commands_[15];
+
+  void add_polling_command_(const char *command, ENUMPollingCommand polling_command);
+  bool send_next_poll_();
+  bool send_next_command_();
+  void queue_command_(const char *command, uint8_t length);
+  void empty_uart_buffer_();
+  uint16_t pipsolar_crc_(uint8_t *msg, uint8_t len);
+  uint8_t check_incoming_length_(uint8_t length);
+  uint8_t check_incoming_crc_();
+
+  std::string command_queue_[COMMAND_QUEUE_LENGTH];
+  uint8_t command_queue_position_ = 0;
+  uint8_t read_buffer_[PIPSOLAR_READ_BUFFER_LENGTH];
+  size_t read_pos_{0};
+  uint32_t command_start_millis_ = 0;
 };
 
 }  // namespace pipsolar
 }  // namespace esphome
 
-// 5. 最后再包含 pipsolar_select.h，此时 Pipsolar 类已经完全定义，PipsolarSelect 可以正常使用
+// 最后引入 select 头文件，解决循环依赖
 #include "pipsolar_select.h"
