@@ -203,6 +203,22 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
   void update() override;
 
  protected:
+  void handle_qpiri_(const char *message);
+  void handle_qpigs_(const char *message);
+  void handle_qmod_(const char *message);
+  void handle_qflag_(const char *message);
+  void handle_qpiws_(const char *message);
+  void handle_qt_(const char *message);
+  void handle_qmn_(const char *message);
+  void handle_qpigs2_(const char *message);
+  void handle_qbatcd_(const char *message);
+  void handle_qpgs0_(const char *message);
+  void handle_q1_(const char *message);
+  void handle_qbms_(const char *message);
+  void handle_qet_(const char *message);
+  void handle_qlt_(const char *message);
+  void handle_qmchgcr_(const char *message);
+  void handle_qmuchgcr_(const char *message);
   static const size_t PIPSOLAR_READ_BUFFER_LENGTH = 110;  // maximum supported answer length
   static const size_t COMMAND_QUEUE_LENGTH = 10;
   static const size_t COMMAND_TIMEOUT = 5000;
