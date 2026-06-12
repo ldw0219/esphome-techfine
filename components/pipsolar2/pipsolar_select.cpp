@@ -1,9 +1,9 @@
 #include "pipsolar_select.h"
 #include "esphome/core/log.h"
 
-namespace esphome::pipsolar2 {
+namespace esphome::pipsolar {
 
-static const char *const TAG = "pipsolar2.select";
+static const char *const TAG = "pipsolar.select";
 
 void PipsolarSelect::dump_config() {
   LOG_SELECT("", "Pipsolar Select", this);
@@ -43,4 +43,4 @@ void PipsolarSelect::map_and_publish(const std::string &value) {
   }
 }
 
-} // namespace esphome::pipsolar2
+} // namespace esphome::pipsolar
