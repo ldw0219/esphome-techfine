@@ -73,7 +73,7 @@ void Pipsolar::dump_config() {
 }
 
 void Pipsolar::add_polling_command_(const char *command, ENUMPollingCommand polling_command) {
-  for (size_t i = 0; i < sizeof(this->used_polling_commands_) / sizeof(PollingCommand); i++) {
+  for (size_t i = 0; i < POLLING_COMMANDS_MAX; i++) {
     if (this->used_polling_commands_[i].length == 0) {
       this->used_polling_commands_[i].command = (uint8_t *) command;
       this->used_polling_commands_[i].length = strlen(command);
@@ -86,7 +86,7 @@ void Pipsolar::add_polling_command_(const char *command, ENUMPollingCommand poll
 }
 
 bool Pipsolar::send_next_poll_() {
-  for (size_t i = 0; i < sizeof(this->used_polling_commands_) / sizeof(PollingCommand); i++) {
+  for (size_t i = 0; i < POLLING_COMMANDS_MAX; i++) {
     if (this->used_polling_commands_[i].length > 0) {
       this->last_polling_command_ = i;
       this->state_ = STATE_POLL;
@@ -160,7 +160,7 @@ uint8_t Pipsolar::check_incoming_crc_() {
 }
 
 void Pipsolar::handle_poll_error_(ENUMPollingCommand polling_command) {
-  for (size_t i = 0; i < sizeof(this->used_polling_commands_) / sizeof(PollingCommand); i++) {
+  for (size_t i = 0; i < POLLING_COMMANDS_MAX; i++) {
     if (this->used_polling_commands_[i].identifier == polling_command) {
       this->used_polling_commands_[i].errors++;
       if (this->used_polling_commands_[i].errors > 5) {
@@ -263,6 +263,7 @@ void Pipsolar::read_float_sensor_(const char *message, size_t *pos, sensor::Sens
   float f = std::stof(val);
   sensor->publish_state(f);
 }
+
 void Pipsolar::read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor) {
   if (sensor == nullptr) return;
   std::string val = this->read_field_(message, pos);
@@ -270,18 +271,18 @@ void Pipsolar::read_int_sensor_(const char *message, size_t *pos, sensor::Sensor
   sensor->publish_state(i);
 }
 
-optional<bool> Pipsolar::get_bit_(const std::string &message, int index) {
+std::optional<bool> Pipsolar::get_bit_(const std::string &message, int index) {
   if ((size_t) index >= message.length()) return {};
   return message[index] == '1';
 }
 
-void Pipsolar::publish_binary_sensor_(optional<bool> state, binary_sensor::BinarySensor *sensor) {
+void Pipsolar::publish_binary_sensor_(std::optional<bool> state, binary_sensor::BinarySensor *sensor) {
   if (sensor && state.has_value()) {
     sensor->publish_state(*state);
   }
 }
 
-// 下面为各个指令解析函数，原有逻辑保留
+// -------------------------- 指令解析函数 --------------------------
 void Pipsolar::handle_qpiri_(const char *message) {
   size_t pos = 0;
   this->skip_start_(message, &pos);
@@ -426,7 +427,7 @@ void Pipsolar::handle_qpiws_(const char *message) {
   this->publish_binary_sensor_(this->get_bit_(warn_fault, 28), this->warning_battery_too_low_to_charge_);
   this->publish_binary_sensor_(this->get_bit_(warn_fault, 29), this->fault_dc_dc_over_current_);
   this->publish_binary_sensor_(this->get_bit_(warn_fault, 30), this->fault_code_);
-  this->publish_binary_sensor_(this->get_bit_(warn_fault, 31), this->warnung_low_pv_energy_);
+  this->publish_binary_sensor_(this->get_bit_(warn_fault, 31), this->warning_low_pv_energy_);
   this->publish_binary_sensor_(this->get_bit_(warn_fault, 32), this->warning_high_ac_input_during_bus_soft_start_);
   this->publish_binary_sensor_(this->get_bit_(warn_fault, 33), this->warning_battery_equalization_);
 
