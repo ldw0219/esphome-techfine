@@ -9,6 +9,7 @@
 #include "esphome/core/component.h"
 #include <string>
 #include <optional>
+using optional = std::optional;
 
 namespace esphome {
 namespace pipsolar {
@@ -266,8 +267,8 @@ class Pipsolar : public uart::UARTDevice, public PollingComponent {
 
   void skip_start_(const char *message, size_t *pos);
   std::string read_field_(const char *message, size_t *pos);
-  template<typename T> void read_float_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
-  template<typename T> void read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  void read_float_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
+  void read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor);
   std::optional<bool> get_bit_(const std::string &message, int index);
   void publish_binary_sensor_(std::optional<bool> state, binary_sensor::BinarySensor *sensor);
 
