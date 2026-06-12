@@ -3,7 +3,8 @@
 #include <map>
 #include <utility>
 
-#include "esphome/components/pipsolar/pipsolar.h"
+// 关键修改：把 pipsolar 改成 pipsolar2，和你的实际文件夹名一致
+#include "esphome/components/pipsolar2/pipsolar.h"
 #include "esphome/components/select/select.h"
 #include "esphome/core/component.h"
 
@@ -29,5 +30,5 @@ class PipsolarSelect : public Component, public select::Select {
   bool optimistic_{false};
 };
 
-}  // namespace pipsolar  // 已修复：原本是 pipsolar2
+}  // namespace pipsolar
 }  // namespace esphome
