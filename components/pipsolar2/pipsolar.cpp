@@ -257,15 +257,12 @@ std::string Pipsolar::read_field_(const char *message, size_t *pos) {
   return field;
 }
 
-template<typename T>
 void Pipsolar::read_float_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor) {
   if (sensor == nullptr) return;
   std::string val = this->read_field_(message, pos);
   float f = std::stof(val);
   sensor->publish_state(f);
 }
-
-template<typename T>
 void Pipsolar::read_int_sensor_(const char *message, size_t *pos, sensor::Sensor *sensor) {
   if (sensor == nullptr) return;
   std::string val = this->read_field_(message, pos);
@@ -288,31 +285,31 @@ void Pipsolar::publish_binary_sensor_(optional<bool> state, binary_sensor::Binar
 void Pipsolar::handle_qpiri_(const char *message) {
   size_t pos = 0;
   this->skip_start_(message, &pos);
-  this->read_float_sensor_<float>(message, &pos, this->grid_rating_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->grid_rating_current_);
-  this->read_float_sensor_<float>(message, &pos, this->ac_output_rating_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->ac_output_rating_frequency_);
-  this->read_float_sensor_<float>(message, &pos, this->ac_output_rating_current_);
-  this->read_int_sensor_<int>(message, &pos, this->ac_output_rating_apparent_power_);
-  this->read_int_sensor_<int>(message, &pos, this->ac_output_rating_active_power_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_rating_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_recharge_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_under_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_bulk_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_float_voltage_);
-  this->read_int_sensor_<int>(message, &pos, this->battery_type_);
-  this->read_int_sensor_<int>(message, &pos, this->current_max_ac_charging_current_);
-  this->read_int_sensor_<int>(message, &pos, this->current_max_charging_current_);
-  this->read_int_sensor_<int>(message, &pos, this->input_voltage_range_);
-  this->read_int_sensor_<int>(message, &pos, this->output_source_priority_);
-  this->read_int_sensor_<int>(message, &pos, this->charger_source_priority_);
-  this->read_int_sensor_<int>(message, &pos, this->parallel_max_num_);
-  this->read_int_sensor_<int>(message, &pos, this->machine_type_);
-  this->read_int_sensor_<int>(message, &pos, this->topology_);
-  this->read_int_sensor_<int>(message, &pos, this->output_mode_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_redischarge_voltage_);
-  this->read_int_sensor_<int>(message, &pos, this->pv_ok_condition_for_parallel_);
-  this->read_int_sensor_<int>(message, &pos, this->pv_power_balance_);
+  this->read_float_sensor_(message, &pos, this->grid_rating_voltage_);
+  this->read_float_sensor_(message, &pos, this->grid_rating_current_);
+  this->read_float_sensor_(message, &pos, this->ac_output_rating_voltage_);
+  this->read_float_sensor_(message, &pos, this->ac_output_rating_frequency_);
+  this->read_float_sensor_(message, &pos, this->ac_output_rating_current_);
+  this->read_int_sensor_(message, &pos, this->ac_output_rating_apparent_power_);
+  this->read_int_sensor_(message, &pos, this->ac_output_rating_active_power_);
+  this->read_float_sensor_(message, &pos, this->battery_rating_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_recharge_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_under_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_bulk_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_float_voltage_);
+  this->read_int_sensor_(message, &pos, this->battery_type_);
+  this->read_int_sensor_(message, &pos, this->current_max_ac_charging_current_);
+  this->read_int_sensor_(message, &pos, this->current_max_charging_current_);
+  this->read_int_sensor_(message, &pos, this->input_voltage_range_);
+  this->read_int_sensor_(message, &pos, this->output_source_priority_);
+  this->read_int_sensor_(message, &pos, this->charger_source_priority_);
+  this->read_int_sensor_(message, &pos, this->parallel_max_num_);
+  this->read_int_sensor_(message, &pos, this->machine_type_);
+  this->read_int_sensor_(message, &pos, this->topology_);
+  this->read_int_sensor_(message, &pos, this->output_mode_);
+  this->read_float_sensor_(message, &pos, this->battery_redischarge_voltage_);
+  this->read_int_sensor_(message, &pos, this->pv_ok_condition_for_parallel_);
+  this->read_int_sensor_(message, &pos, this->pv_power_balance_);
 
   if (this->last_qpiri_ != nullptr) {
     this->last_qpiri_->publish_state(std::string(message));
@@ -322,22 +319,22 @@ void Pipsolar::handle_qpiri_(const char *message) {
 void Pipsolar::handle_qpigs_(const char *message) {
   size_t pos = 0;
   this->skip_start_(message, &pos);
-  this->read_float_sensor_<float>(message, &pos, this->grid_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->grid_frequency_);
-  this->read_float_sensor_<float>(message, &pos, this->ac_output_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->ac_output_frequency_);
-  this->read_int_sensor_<int>(message, &pos, this->ac_output_apparent_power_);
-  this->read_int_sensor_<int>(message, &pos, this->ac_output_active_power_);
-  this->read_int_sensor_<int>(message, &pos, this->output_load_percent_);
-  this->read_int_sensor_<int>(message, &pos, this->bus_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_voltage_);
-  this->read_int_sensor_<int>(message, &pos, this->battery_charging_current_);
-  this->read_int_sensor_<int>(message, &pos, this->battery_capacity_percent_);
-  this->read_int_sensor_<int>(message, &pos, this->inverter_heat_sink_temperature_);
-  this->read_float_sensor_<float>(message, &pos, this->pv1_input_current_);
-  this->read_float_sensor_<float>(message, &pos, this->pv1_input_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->battery_voltage_scc_);
-  this->read_int_sensor_<int>(message, &pos, this->battery_discharge_current_);
+  this->read_float_sensor_(message, &pos, this->grid_voltage_);
+  this->read_float_sensor_(message, &pos, this->grid_frequency_);
+  this->read_float_sensor_(message, &pos, this->ac_output_voltage_);
+  this->read_float_sensor_(message, &pos, this->ac_output_frequency_);
+  this->read_int_sensor_(message, &pos, this->ac_output_apparent_power_);
+  this->read_int_sensor_(message, &pos, this->ac_output_active_power_);
+  this->read_int_sensor_(message, &pos, this->output_load_percent_);
+  this->read_int_sensor_(message, &pos, this->bus_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_voltage_);
+  this->read_int_sensor_(message, &pos, this->battery_charging_current_);
+  this->read_int_sensor_(message, &pos, this->battery_capacity_percent_);
+  this->read_int_sensor_(message, &pos, this->inverter_heat_sink_temperature_);
+  this->read_float_sensor_(message, &pos, this->pv1_input_current_);
+  this->read_float_sensor_(message, &pos, this->pv1_input_voltage_);
+  this->read_float_sensor_(message, &pos, this->battery_voltage_scc_);
+  this->read_int_sensor_(message, &pos, this->battery_discharge_current_);
 
   std::string bits = this->read_field_(message, &pos);
   this->publish_binary_sensor_(this->get_bit_(bits, 0), this->add_sbu_priority_version_);
@@ -349,9 +346,9 @@ void Pipsolar::handle_qpigs_(const char *message) {
   this->publish_binary_sensor_(this->get_bit_(bits, 6), this->scc_charging_status_);
   this->publish_binary_sensor_(this->get_bit_(bits, 7), this->ac_charging_status_);
 
-  this->read_int_sensor_<int>(message, &pos, this->battery_voltage_offset_for_fans_on_);
-  this->read_int_sensor_<int>(message, &pos, this->eeprom_version_);
-  this->read_int_sensor_<int>(message, &pos, this->pv1_charging_power_);
+  this->read_int_sensor_(message, &pos, this->battery_voltage_offset_for_fans_on_);
+  this->read_int_sensor_(message, &pos, this->eeprom_version_);
+  this->read_int_sensor_(message, &pos, this->pv1_charging_power_);
 
   std::string bits2 = this->read_field_(message, &pos);
   this->publish_binary_sensor_(this->get_bit_(bits2, 0), this->charging_to_floating_mode_);
@@ -460,22 +457,22 @@ void Pipsolar::handle_qmn_(const char *message) {
 void Pipsolar::handle_hgen_(const char *message) {
   size_t pos = 0;
   this->skip_start_(message, &pos);
-  this->read_int_sensor_<int>(message, &pos, this->today_date_);
-  this->read_int_sensor_<int>(message, &pos, this->now_time_);
-  this->read_int_sensor_<int>(message, &pos, this->now_time_hour_);
-  this->read_int_sensor_<int>(message, &pos, this->now_time_min_);
-  this->read_float_sensor_<float>(message, &pos, this->daily_electricity_generation_);
-  this->read_float_sensor_<float>(message, &pos, this->monthly_electricity_generation_);
-  this->read_float_sensor_<float>(message, &pos, this->annual_electricity_generation_);
-  this->read_float_sensor_<float>(message, &pos, this->total_electricity_generation_);
+  this->read_int_sensor_(message, &pos, this->today_date_);
+  this->read_int_sensor_(message, &pos, this->now_time_);
+  this->read_int_sensor_(message, &pos, this->now_time_hour_);
+  this->read_int_sensor_(message, &pos, this->now_time_min_);
+  this->read_float_sensor_(message, &pos, this->daily_electricity_generation_);
+  this->read_float_sensor_(message, &pos, this->monthly_electricity_generation_);
+  this->read_float_sensor_(message, &pos, this->annual_electricity_generation_);
+  this->read_float_sensor_(message, &pos, this->total_electricity_generation_);
 }
 
 void Pipsolar::handle_hpvb_(const char *message) {
   size_t pos = 0;
   this->skip_start_(message, &pos);
-  this->read_float_sensor_<float>(message, &pos, this->pv2_input_voltage_);
-  this->read_float_sensor_<float>(message, &pos, this->pv2_input_current_);
-  this->read_float_sensor_<float>(message, &pos, this->pv2_input_power_);
+  this->read_float_sensor_(message, &pos, this->pv2_input_voltage_);
+  this->read_float_sensor_(message, &pos, this->pv2_input_current_);
+  this->read_float_sensor_(message, &pos, this->pv2_input_power_);
 }
 
 void Pipsolar::handle_qpigs2_(const char *message) {}
