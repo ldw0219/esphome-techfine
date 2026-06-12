@@ -8,7 +8,7 @@ static const char *const TAG = "pipsolar.select";
 
 void PipsolarSelect::dump_config() {
   LOG_SELECT("", "Pipsolar Select", this);
-  this->log_select_options();
+  // 移除 this->log_select_options();，ESPhome 没有这个方法
 }
 
 void PipsolarSelect::control(const std::string &value) {
