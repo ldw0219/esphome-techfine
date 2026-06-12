@@ -3,11 +3,11 @@
 #include <map>
 #include <utility>
 
-#include "esphome/components/pipsolar2/pipsolar.h"
+#include "esphome/components/pipsolar/pipsolar.h"
 #include "esphome/components/select/select.h"
 #include "esphome/core/component.h"
 
-namespace esphome::pipsolar2 {
+namespace esphome::pipsolar {
 class Pipsolar;
 
 class PipsolarSelect : public Component, public select::Select {
